@@ -1,14 +1,23 @@
 package expenses
 
 import (
+	"encoding/json"
 	"fmt"
 	"meuprojeto/db"
 	"net/http"
 )
 
+type Expense struct {
+	Id          int     `json:"id"`
+	Description string  `json:"description"`
+	Amount      float32 `json:"amount"`
+	Tag_id      int     `json:"tag_id"`
+	UserID      int     `json:"user_id"`
+}
+
 func BuscarDespesas(w http.ResponseWriter, r *http.Request) {
 	rows, err := db.DB.Query(`
-		SELECT id, description, amount, tag_id, user_id, created_at
+		SELECT id, description, amount, tag_id, user_id
 		FROM expenses
 		WHERE deleted_at = '0000-00-00 00:00:00'
 	`)
@@ -18,20 +27,20 @@ func BuscarDespesas(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
-	for rows.Next() {
-		var id int
-		var desc string
-		var amount float64
-		var tagID, userID int
-		var createdAt string
+	var expenses []Expense
 
-		if err := rows.Scan(&id, &desc, &amount, &tagID, &userID, &createdAt); err != nil {
+	for rows.Next() {
+		var expense Expense
+
+		if err := rows.Scan(&expense.Id, &expense.Description, &expense.Amount, &expense.Tag_id, &expense.UserID); err != nil {
 			http.Error(w, "Erro no scan", http.StatusInternalServerError)
 			return
 		}
-		fmt.Fprintf(w, "Despesa %d: %s R$%.2f (tag %d) usuário %d - %s\n",
-			id, desc, amount, tagID, userID, createdAt)
+		expenses = append(expenses, expense)
 	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(expenses)
+
 }
 
 func BuscarDespesaUser(w http.ResponseWriter, r *http.Request) {
