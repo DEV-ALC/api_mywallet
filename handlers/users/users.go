@@ -10,7 +10,7 @@ func UsersAtivo(w http.ResponseWriter, r *http.Request) {
 	rows, err := db.DB.Query(`
 		SELECT id, username, email
 		FROM users
-		WHERE access_enabled = true AND deleted_at IS NULL
+		WHERE access_enabled = true AND deleted_at = '0000-00-00 00:00:00'
 	`)
 	if err != nil {
 		http.Error(w, "Erro na query", http.StatusInternalServerError)
