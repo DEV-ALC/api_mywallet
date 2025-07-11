@@ -13,6 +13,7 @@ type Expense struct {
 	Amount      float32 `json:"amount"`
 	Tag_id      int     `json:"tag_id,omitempty"` // usado em outras rotas
 	UserID      int     `json:"user_id,omitempty"`
+	CreatedAt   string  `json:"created_at,omitempty"`
 	UpdatedAt   string  `json:"updated_at,omitempty"`
 	DeletedAt   string  `json:"deleted_at,omitempty"`
 }
@@ -80,18 +81,22 @@ func BuscarDespesaUser(w http.ResponseWriter, r *http.Request) {
 // Buscar despesas modificadas após a data `last`
 func DespesasSync(w http.ResponseWriter, r *http.Request) {
 	last := r.URL.Query().Get("last")
-	if last == "" {
-		http.Error(w, "Parâmetro 'last' é obrigatório", http.StatusBadRequest)
-		return
+	user_id := r.URL.Query().Get("id")
+
+	if user_id == "" || last == "" || last == "0000-00-00 00:00:00" {
+		last = "1970-01-01 00:00:00"
 	}
 
 	rows, err := db.DB.Query(`
 		SELECT id, description, amount, updated_at, deleted_at
 		FROM expenses
-		WHERE (updated_at > ? OR deleted_at > ?)
-	`, last, last)
+		WHERE user_id = ?
+		AND (
+			updated_at > ? OR (deleted_at IS NOT NULL AND deleted_at > ?)
+		)
+	`, user_id, last, last)
 	if err != nil {
-		http.Error(w, "Erro na query", http.StatusInternalServerError)
+		http.Error(w, "Erro ao buscar despesas", http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
@@ -100,7 +105,8 @@ func DespesasSync(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var expense Expense
 		if err := rows.Scan(&expense.Id, &expense.Description, &expense.Amount, &expense.UpdatedAt, &expense.DeletedAt); err != nil {
-			http.Error(w, "Erro no scan", http.StatusInternalServerError)
+
+			http.Error(w, "Erro ao processar dados", http.StatusInternalServerError)
 			return
 		}
 		expenses = append(expenses, expense)

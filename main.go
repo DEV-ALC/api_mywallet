@@ -16,7 +16,7 @@ func main() {
 	//despesas
 	http.HandleFunc("/despesas", expenses.BuscarDespesas)
 	http.HandleFunc("/despesas/usuario", expenses.BuscarDespesaUser)
-	http.HandleFunc("/despesas/sync", expenses.DespesasSync)
+	http.HandleFunc("/despesas/usuario/sync", expenses.DespesasSync)
 
 	//etiquetas
 	http.HandleFunc("/tags", tags.BuscarTags)
