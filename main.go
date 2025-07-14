@@ -24,6 +24,7 @@ func main() {
 
 	//usuarios
 	http.HandleFunc("/usuarios", users.UsersAtivo)
+	http.HandleFunc("/usuarios/login", expenses.DespesasSync)
 	http.HandleFunc("/usuarios/sync", expenses.DespesasSync)
 
 	// Iniciar o servidor na porta 8080
