@@ -20,9 +20,11 @@ func main() {
 
 	//etiquetas
 	http.HandleFunc("/tags", tags.BuscarTags)
+	http.HandleFunc("/tags/usuario/sync", expenses.DespesasSync)
 
 	//usuarios
-	http.HandleFunc("/usuarios/ativos", users.UsersAtivo)
+	http.HandleFunc("/usuarios", users.UsersAtivo)
+	http.HandleFunc("/usuarios/sync", expenses.DespesasSync)
 
 	// Iniciar o servidor na porta 8080
 	fmt.Println("🚀 Servidor rodando em http://localhost:81")

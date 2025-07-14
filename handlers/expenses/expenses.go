@@ -23,7 +23,7 @@ func BuscarDespesas(w http.ResponseWriter, r *http.Request) {
 	rows, err := db.DB.Query(`
 		SELECT id, description, amount, tag_id, user_id
 		FROM expenses
-		WHERE deleted_at = '0000-00-00 00:00:00'
+		WHERE deleted_at IS NULL
 	`)
 	if err != nil {
 		http.Error(w, "Erro na query", http.StatusInternalServerError)
@@ -56,7 +56,7 @@ func BuscarDespesaUser(w http.ResponseWriter, r *http.Request) {
 	rows, err := db.DB.Query(`
 		SELECT id, description, amount, tag_id, user_id
 		FROM expenses
-		WHERE user_id = ? AND deleted_at = '0000-00-00 00:00:00'
+		WHERE user_id = ? AND deleted_at IS NULL
 	`, userID)
 	if err != nil {
 		http.Error(w, "Erro na query", http.StatusInternalServerError)
